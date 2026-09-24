@@ -272,9 +272,16 @@ const healthCheck = (_req, res) => {
 
 app.get('/api/health', healthCheck);
 app.get('/health', healthCheck);
+
+// Mount routes on both /api/* and /* to support all client conventions
 app.use('/api/auth', authLimiter, authRoutes);
+app.use('/auth', authLimiter, authRoutes);
+
 app.use('/api/products', productRoutes);
+app.use('/products', productRoutes);
+
 app.use('/api/orders', orderRoutes);
+app.use('/orders', orderRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

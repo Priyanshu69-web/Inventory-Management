@@ -9,16 +9,36 @@ const productFields = {
   category: z.string().trim().min(1).max(100).transform((value) => value.toLowerCase()),
 };
 
+const normalizeProductInput = (data) => {
+  if (data && typeof data === 'object') {
+    const copy = { ...data };
+    if (copy.stockQuantity === undefined) {
+      if (copy.stock_quantity !== undefined) {
+        copy.stockQuantity = copy.stock_quantity;
+        delete copy.stock_quantity;
+      } else if (copy.stock !== undefined) {
+        copy.stockQuantity = copy.stock;
+        delete copy.stock;
+      }
+    }
+    return copy;
+  }
+  return data;
+};
+
 export const createProductSchema = z.object({
-  body: z.object(productFields).strict(),
+  body: z.preprocess(normalizeProductInput, z.object(productFields).strict()),
   params: z.object({}),
   query: z.object({}),
 });
 
 export const updateProductSchema = z.object({
-  body: z.object(productFields).partial().strict().refine(
-    (body) => Object.keys(body).length > 0,
-    'At least one product field is required',
+  body: z.preprocess(
+    normalizeProductInput,
+    z.object(productFields).partial().strict().refine(
+      (body) => Object.keys(body).length > 0,
+      'At least one product field is required',
+    ),
   ),
   params: z.object({ id: objectId }),
   query: z.object({}),
