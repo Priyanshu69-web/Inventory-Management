@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory & Order Management Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 24, 38, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.2);
+      --input-bg: #0f172a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 45%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Navbar */
+    header {
+      border-bottom: 1px solid var(--card-border);
+      background: rgba(9, 13, 22, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 24px;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .logo-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .logo-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #fff;
+    }
+    .logo-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      background: var(--success-glow);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--success);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .user-pill strong { color: var(--text); }
+
+    /* Tabs */
+    .tabs-wrapper {
+      max-width: 1200px;
+      width: 100%;
+      margin: 24px auto 0;
+      padding: 0 20px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .tab-btn.active {
+      color: #fff;
+      background: var(--accent);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+      flex: 1;
+    }
+
+    /* Section Headers */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .filters-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .search-box {
+      position: relative;
+      min-width: 240px;
+      flex: 1;
+      max-width: 360px;
+    }
+    .search-box input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 14px 10px 38px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-box input:focus {
+      border-color: var(--accent);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    select.filter-select {
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+    }
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    /* Cards & Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(99, 102, 241, 0.35);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .tag {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .tag-cat {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+    .tag-instock {
+      background: var(--success-glow);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .tag-outstock {
+      background: var(--danger-glow);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      min-height: 40px;
+    }
+    .card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--card-border);
+    }
+    .price {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #fff;
+    }
+    .stock-count {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Orders View */
+    .order-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .order-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .order-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+    }
+    .order-date {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .order-items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+    }
+    .order-items-table th {
+      text-align: left;
+      padding: 8px 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .order-items-table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .order-foot {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      padding-top: 8px;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-content {
+      background: #111827;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+
+    /* Q&A / Docs Tab */
+    .doc-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .doc-section h2 {
+      font-size: 1.4rem;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+    .doc-section h3 {
+      font-size: 1.05rem;
+      margin: 18px 0 8px;
+      color: #a5b4fc;
+    }
+    .doc-section p, .doc-section li {
+      color: #cbd5e1;
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+    .doc-section ul {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+    .code-block {
+      background: #060911;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    /* Toasts */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #fff;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast-success { background: #065f46; border: 1px solid #10b981; }
+    .toast-error { background: #7f1d1d; border: 1px solid #ef4444; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="nav-container">
+      <div class="logo-group">
+        <div class="logo-icon">📦</div>
+        <div>
+          <div class="logo-title">Inventory & Order Management</div>
+          <div class="logo-sub">REST API & Live Inventory Dashboard</div>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <div class="status-badge" id="health-badge">
+          <span class="status-dot"></span>
+          <span>API Connected</span>
+        </div>
+        <div class="user-pill" id="user-display">
+          <span>Connecting...</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" id="auth-btn" onclick="openAuthModal()">Login / Demo</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('products')">📦 Products & Stock</button>
+      <button class="tab-btn" onclick="switchTab('orders')">🛒 Orders History</button>
+      <button class="tab-btn" onclick="switchTab('api-explorer')">⚡ Live API Tester</button>
+      <button class="tab-btn" onclick="switchTab('qa-tab')">📝 Technical Task Q&A</button>
+    </div>
+  </div>
+
+  <main>
+    <!-- TAB 1: PRODUCTS -->
+    <section id="tab-products">
+      <div class="toolbar">
+        <div class="filters-group">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Search products by name..." oninput="debounceFetch()">
+          </div>
+          <select id="category-filter" class="filter-select" onchange="fetchProducts()">
+            <option value="">All Categories</option>
+            <option value="electronics">Electronics</option>
+            <option value="accessories">Accessories</option>
+            <option value="audio">Audio</option>
+            <option value="furniture">Furniture</option>
+          </select>
+          <select id="stock-filter" class="filter-select" onchange="fetchProducts()">
+            <option value="">All Stock</option>
+            <option value="true">In Stock</option>
+            <option value="false">Out of Stock</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" onclick="seedDemoData()">⚡ Seed Sample Data</button>
+          <button class="btn btn-primary" onclick="openAddProductModal()">+ Add Product</button>
+        </div>
+      </div>
+
+      <div id="products-loading" style="text-align: center; padding: 60px 0; color: var(--text-muted);">
+        Loading live inventory from database...
+      </div>
+
+      <div class="grid" id="products-grid"></div>
+
+      <div class="pagination" id="pagination-controls" style="display: none;">
+        <button class="btn btn-secondary btn-sm" id="prev-btn" onclick="changePage(-1)">← Previous</button>
+        <span id="page-indicator" style="font-size: 0.85rem; color: var(--text-muted);">Page 1</span>
+        <button class="btn btn-secondary btn-sm" id="next-btn" onclick="changePage(1)">Next →</button>
+      </div>
+    </section>
+
+    <!-- TAB 2: ORDERS -->
+    <section id="tab-orders" class="hidden">
+      <div class="toolbar">
+        <div>
+          <h2 style="font-size: 1.3rem;">Order History</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Orders placed by your authenticated account</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="fetchOrders()">🔄 Refresh Orders</button>
+      </div>
+      <div id="orders-loading" style="text-align: center; padding: 40px 0; color: var(--text-muted); display: none;">
+        Loading orders...
+      </div>
+      <div id="orders-list"></div>
+    </section>
+
+    <!-- TAB 3: API EXPLORER -->
+    <section id="tab-api-explorer" class="hidden">
+      <div class="doc-section">
+        <h2>⚡ Live API Endpoints</h2>
+        <p>You can test these endpoints directly or using Postman.</p>
+
+        <div style="margin-top: 20px; display: grid; gap: 12px;">
+          <div style="display: flex; gap: 10px; align-items: center; background: #060911; padding: 12px; border-radius: 8px;">
+            <span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem;">GET</span>
+            <span style="font-family: 'JetBrains Mono', monospace; flex: 1;">/api/health</span>
+            <button class="btn btn-secondary btn-sm" onclick="testEndpoint('/api/health')">Execute</button>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; background: #060911; padding: 12px; border-radius: 8px;">
+            <span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem;">GET</span>
+            <span style="font-family: 'JetBrains Mono', monospace; flex: 1;">/api/products?page=1&limit=5</span>
+            <button class="btn btn-secondary btn-sm" onclick="testEndpoint('/api/products?page=1&limit=5')">Execute</button>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; background: #060911; padding: 12px; border-radius: 8px;">
+            <span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 0.8rem;">GET</span>
+            <span style="font-family: 'JetBrains Mono', monospace; flex: 1;">/api/orders</span>
+            <button class="btn btn-secondary btn-sm" onclick="testEndpoint('/api/orders')">Execute</button>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 24px;">API Response Output:</h3>
+        <pre class="code-block" id="api-output" style="max-height: 250px; overflow-y: auto;">Click "Execute" above to see live server response...</pre>
+      </div>
+    </section>
+
+    <!-- TAB 4: TECHNICAL Q&A -->
+    <section id="tab-qa-tab" class="hidden">
+      <div class="doc-section">
+        <h2>Technical Task Question: Handling Simultaneous Purchases</h2>
+        <p><strong>Question:</strong> <em>"Imagine two users try to buy the last available item at the same time. How would you make sure the stock does not become negative or both orders get confirmed?"</em></p>
+        
+        <h3>Solution Implemented in this API:</h3>
+        <p>To avoid race conditions, this system does not perform a separate read followed by a write. Instead, it uses:</p>
+        
+        <div class="code-block">
+const product = await Product.findOneAndUpdate(
+  {
+    _id: requestedItem.product,
+    stockQuantity: { $gte: requestedItem.quantity }, // Condition checked atomically
+  },
+  { $inc: { stockQuantity: -requestedItem.quantity } }, // Decrement applied only if condition met
+  { returnDocument: 'after', session }
+);
+        </div>
+
+        <ul>
+          <li><strong>Database-Level Atomicity:</strong> In MongoDB, document updates are strictly atomic. When two concurrent requests arrive simultaneously, only the first transaction to lock the document succeeds. The second request immediately fails the condition (since stock drops below 1) and returns <code>null</code>.</li>
+          <li><strong>Multi-Document ACID Transactions:</strong> The operation runs inside a MongoDB transaction session (<code>session.withTransaction</code>). If any product in an order is insufficient or missing, the entire transaction is rolled back.</li>
+          <li><strong>HTTP 409 Conflict:</strong> The winning user receives <code>201 Created</code>, while the second user receives <code>409 Conflict: Insufficient stock</code>. Stock never drops below zero.</li>
+        </ul>
+
+        <h2 style="margin-top: 32px;">AI Usage Disclosure</h2>
+        <p>In accordance with the task instructions:</p>
+        <ul>
+          <li><strong>AI Tools Used:</strong> Antigravity AI / Claude / Gemini</li>
+          <li><strong>What they were used for:</strong>
+            <ul>
+              <li>Architecting the modular folder structure (<code>auth</code>, <code>products</code>, <code>orders</code>)</li>
+              <li>Designing Zod validation schemas and atomic decrement queries</li>
+              <li>Implementing concurrency integration tests in Vitest</li>
+              <li>Configuring cloud deployment on Render and building this dashboard</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- Buy / Order Modal -->
+  <div class="modal-overlay" id="order-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Place Order</div>
+        <button class="close-btn" onclick="closeModal('order-modal')">&times;</button>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <h4 id="order-product-name" style="color: #fff; margin-bottom: 4px;">Product</h4>
+        <p id="order-product-price" style="color: var(--accent); font-weight: 700;"></p>
+        <p id="order-product-stock" style="font-size: 0.8rem; color: var(--text-muted);"></p>
+      </div>
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="order-qty" value="1" min="1" max="50">
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('order-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitOrder()">Confirm Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal-overlay" id="add-product-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Add New Product</div>
+        <button class="close-btn" onclick="closeModal('add-product-modal')">&times;</button>
+      </div>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="new-prod-name" placeholder="e.g., Wireless Gaming Headset" required>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" id="new-prod-cat" placeholder="e.g., electronics, audio" required>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label>Price ($)</label>
+          <input type="number" id="new-prod-price" placeholder="99.99" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Stock Quantity</label>
+          <input type="number" id="new-prod-stock" placeholder="10" min="0" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="new-prod-desc" rows="3" placeholder="Detailed product specifications..." required></textarea>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('add-product-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitNewProduct()">Create Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <script>
+    let token = localStorage.getItem('token') || '';
+    let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+    let currentPage = 1;
+    let selectedProductId = null;
+    let debounceTimer = null;
+
+    // Initialize application on load
+    window.addEventListener('DOMContentLoaded', async () => {
+      checkHealth();
+      if (!token) {
+        // Automatically seed demo data and sign in as demo user for instant live view
+        await seedDemoData(true);
+      } else {
+        updateUserUI();
+        fetchProducts();
+      }
+    });
+
+    async function checkHealth() {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('health-badge').innerHTML = '<span class="status-dot"></span><span>API Live & Operational</span>';
+        }
+      } catch (e) {
+        document.getElementById('health-badge').innerHTML = '<span style="color: var(--danger);">● API Offline</span>';
+      }
+    }
+
+    function updateUserUI() {
+      const userDisplay = document.getElementById('user-display');
+      const authBtn = document.getElementById('auth-btn');
+      if (currentUser && token) {
+        userDisplay.innerHTML = `👤 <strong>${currentUser.name}</strong>`;
+        authBtn.innerText = 'Log Out';
+        authBtn.onclick = logout;
+      } else {
+        userDisplay.innerHTML = `<span>Guest User</span>`;
+        authBtn.innerText = 'Quick Demo Login';
+        authBtn.onclick = () => seedDemoData(false);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      token = '';
+      currentUser = null;
+      updateUserUI();
+      showToast('Logged out', 'success');
+      fetchProducts();
+    }
+
+    async function seedDemoData(silent = false) {
+      try {
+        const res = await fetch('/api/seed', { method: 'POST' });
+        const json = await res.json();
+        if (json.success && json.data) {
+          token = json.data.token;
+          currentUser = json.data.user;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(currentUser));
+          updateUserUI();
+          if (!silent) showToast('Demo environment initialized!', 'success');
+          fetchProducts();
+        }
+      } catch (err) {
+        if (!silent) showToast('Failed to seed demo data', 'error');
+      }
+    }
+
+    function debounceFetch() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        currentPage = 1;
+        fetchProducts();
+      }, 300);
+    }
+
+    async function fetchProducts() {
+      const loading = document.getElementById('products-loading');
+      const grid = document.getElementById('products-grid');
+      const pagination = document.getElementById('pagination-controls');
+      loading.style.display = 'block';
+      grid.innerHTML = '';
+
+      const search = document.getElementById('search-input').value.trim();
+      const category = document.getElementById('category-filter').value;
+      const inStock = document.getElementById('stock-filter').value;
+
+      let url = `/api/products?page=${currentPage}&limit=9`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+      if (category) url += `&category=${encodeURIComponent(category)}`;
+      if (inStock) url += `&inStock=${encodeURIComponent(inStock)}`;
+
+      try {
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(url, { headers });
+        const json = await res.json();
+
+        loading.style.display = 'none';
+        if (!json.success) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--danger); padding: 40px;">${json.message || 'Please log in to view inventory'}</div>`;
+          pagination.style.display = 'none';
+          return;
+        }
+
+        const products = json.data || [];
+        if (products.length === 0) {
+          grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">No products match your search or filter.</div>`;
+          pagination.style.display = 'none';
+          return;
+        }
+
+        grid.innerHTML = products.map(p => `
+          <div class="card">
+            <div>
+              <div class="card-header">
+                <div class="card-title">${escapeHtml(p.name)}</div>
+                <span class="tag tag-cat">${escapeHtml(p.category)}</span>
+              </div>
+              <p class="card-desc">${escapeHtml(p.description || 'No description available')}</p>
+            </div>
+            <div>
+              <div class="card-meta">
+                <div class="price">$${Number(p.price).toFixed(2)}</div>
+                <div>
+                  <span class="tag ${p.stockQuantity > 0 ? 'tag-instock' : 'tag-outstock'}">
+                    ${p.stockQuantity > 0 ? `${p.stockQuantity} in stock` : 'Out of stock'}
+                  </span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-primary btn-sm" style="flex: 1;" ${p.stockQuantity <= 0 ? 'disabled' : ''} onclick="openOrderModal('${p._id}', '${escapeHtml(p.name)}', ${p.price}, ${p.stockQuantity})">
+                  🛒 ${p.stockQuantity > 0 ? 'Buy / Order' : 'Sold Out'}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p._id}')">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        if (json.pagination) {
+          pagination.style.display = 'flex';
+          document.getElementById('page-indicator').innerText = `Page ${json.pagination.page} of ${json.pagination.totalPages || 1}`;
+          document.getElementById('prev-btn').disabled = json.pagination.page <= 1;
+          document.getElementById('next-btn').disabled = json.pagination.page >= json.pagination.totalPages;
+        }
+      } catch (err) {
+        loading.style.display = 'none';
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--danger);">Failed to load products: ${err.message}</div>`;
+      }
+    }
+
+    function changePage(direction) {
+      currentPage += direction;
+      fetchProducts();
+    }
+
+    function openOrderModal(id, name, price, stock) {
+      selectedProductId = id;
+      document.getElementById('order-product-name').innerText = name;
+      document.getElementById('order-product-price').innerText = `$${price.toFixed(2)}`;
+      document.getElementById('order-product-stock').innerText = `Available: ${stock} units`;
+      document.getElementById('order-qty').value = 1;
+      document.getElementById('order-qty').max = stock;
+      document.getElementById('order-modal').classList.add('active');
+    }
+
+    async function submitOrder() {
+      const quantity = parseInt(document.getElementById('order-qty').value, 10);
+      if (!quantity || quantity < 1) {
+        showToast('Please enter a valid quantity', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            items: [{ product: selectedProductId, quantity }]
+          })
+        });
+
+        const json = await res.json();
+        closeModal('order-modal');
+
+        if (json.success) {
+          showToast(`Order placed successfully! Total: $${json.data.totalAmount}`, 'success');
+          fetchProducts();
+        } else {
+          showToast(json.message || 'Failed to place order', 'error');
+        }
+      } catch (err) {
+        showToast('Network error placing order', 'error');
+      }
+    }
+
+    function openAddProductModal() {
+      document.getElementById('add-product-modal').classList.add('active');
+    }
+
+    async function submitNewProduct() {
+      const name = document.getElementById('new-prod-name').value.trim();
+      const category = document.getElementById('new-prod-cat').value.trim();
+      const price = parseFloat(document.getElementById('new-prod-price').value);
+      const stockQuantity = parseInt(document.getElementById('new-prod-stock').value, 10);
+      const description = document.getElementById('new-prod-desc').value.trim();
+
+      if (!name || !category || isNaN(price) || isNaN(stockQuantity) || !description) {
+        showToast('Please fill all fields properly', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/products', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name, category, price, stockQuantity, description })
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          closeModal('add-product-modal');
+          showToast('Product added successfully!', 'success');
+          // Clear inputs
+          document.getElementById('new-prod-name').value = '';
+          document.getElementById('new-prod-cat').value = '';
+          document.getElementById('new-prod-price').value = '';
+          document.getElementById('new-prod-stock').value = '';
+          document.getElementById('new-prod-desc').value = '';
+          fetchProducts();
+        } else {
+          showToast(json.message || 'Error adding product', 'error');
+        }
+      } catch (err) {
+        showToast('Network error adding product', 'error');
+      }
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('Are you sure you want to delete this product?')) return;
+      try {
+        const res = await fetch(`/api/products/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.status === 204) {
+          showToast('Product deleted', 'success');
+          fetchProducts();
+        } else {
+          showToast('Failed to delete product', 'error');
+        }
+      } catch (err) {
+        showToast('Network error deleting product', 'error');
+      }
+    }
+
+    async function fetchOrders() {
+      const ordersList = document.getElementById('orders-list');
+      const loading = document.getElementById('orders-loading');
+      loading.style.display = 'block';
+      ordersList.innerHTML = '';
+
+      try {
+        const res = await fetch('/api/orders', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const json = await res.json();
+        loading.style.display = 'none';
+
+        if (!json.success || !json.data || json.data.length === 0) {
+          ordersList.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 40px;">No orders found. Purchase an item in the Products tab to see it here!</div>`;
+          return;
+        }
+
+        ordersList.innerHTML = json.data.map(order => `
+          <div class="order-card">
+            <div class="order-head">
+              <div>
+                <span class="order-id">Order #${order._id}</span>
+                <div class="order-date">${new Date(order.createdAt).toLocaleString()}</div>
+              </div>
+              <span class="tag tag-instock">${order.status.toUpperCase()}</span>
+            </div>
+            <table class="order-items-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Unit Price</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.items.map(item => `
+                  <tr>
+                    <td>${escapeHtml(item.product?.name || 'Product')}</td>
+                    <td>${item.quantity}</td>
+                    <td>$${item.price.toFixed(2)}</td>
+                    <td><strong>$${item.subtotal.toFixed(2)}</strong></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="order-foot">
+              <span style="color: var(--text-muted); font-size: 0.9rem;">Total Paid:</span>
+              <span class="price">$${order.totalAmount.toFixed(2)}</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        loading.style.display = 'none';
+        ordersList.innerHTML = `<div style="color: var(--danger); text-align: center;">Error fetching orders: ${err.message}</div>`;
+      }
+    }
+
+    async function testEndpoint(endpoint) {
+      const output = document.getElementById('api-output');
+      output.innerText = `Fetching ${endpoint}...`;
+      try {
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch(endpoint, { headers });
+        const json = await res.json();
+        output.innerText = JSON.stringify(json, null, 2);
+      } catch (err) {
+        output.innerText = `Error: ${err.message}`;
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('tab-products').classList.add('hidden');
+      document.getElementById('tab-orders').classList.add('hidden');
+      document.getElementById('tab-api-explorer').classList.add('hidden');
+      document.getElementById('tab-qa-tab').classList.add('hidden');
+
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+      if (tabId === 'orders') fetchOrders();
+      if (tabId === 'products') fetchProducts();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerText = (type === 'success' ? '✓ ' : '⚠️ ') + message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+  </script>
+</body>
+</html>
