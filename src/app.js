@@ -257,7 +257,6 @@ app.get('/', (req, res) => {
 
     <div class="links">
       <a href="/api/health" class="btn btn-primary">Check Health Status</a>
-      <a href="https://github.com/Priyanshu69-web/Inventory-Management" target="_blank" class="btn btn-secondary">View GitHub Repository</a>
     </div>
   </div>
 </body>
