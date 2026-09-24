@@ -10,6 +10,7 @@ import { notFound } from './middleware/notFound.js';
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(helmet());
 app.use(cors());
@@ -23,9 +24,40 @@ const authLimiter = rateLimit({
   message: { success: false, message: 'Too many authentication attempts; try again later' },
 });
 
-app.get('/api/health', (_req, res) => {
-  res.json({ success: true, message: 'API is running' });
+// Root endpoint with API info and endpoint index
+app.get('/', (_req, res) => {
+  res.json({
+    success: true,
+    message: 'Inventory & Order REST API is running',
+    version: '1.0.0',
+    endpoints: {
+      health: 'GET /api/health',
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+      },
+      products: {
+        list: 'GET /api/products',
+        getById: 'GET /api/products/:id',
+        create: 'POST /api/products',
+        update: 'PATCH /api/products/:id',
+        delete: 'DELETE /api/products/:id',
+      },
+      orders: {
+        list: 'GET /api/orders',
+        getById: 'GET /api/orders/:id',
+        create: 'POST /api/orders',
+      },
+    },
+  });
 });
+
+const healthCheck = (_req, res) => {
+  res.json({ success: true, message: 'API is running' });
+};
+
+app.get('/api/health', healthCheck);
+app.get('/health', healthCheck);
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);

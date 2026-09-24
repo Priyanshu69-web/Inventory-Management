@@ -52,6 +52,18 @@ it('reports API health', async () => {
   const response = await request(app).get('/api/health');
   expect(response.status).toBe(200);
   expect(response.body).toEqual({ success: true, message: 'API is running' });
+
+  const healthAlias = await request(app).get('/health');
+  expect(healthAlias.status).toBe(200);
+  expect(healthAlias.body).toEqual({ success: true, message: 'API is running' });
+});
+
+it('returns API overview on root GET /', async () => {
+  const response = await request(app).get('/');
+  expect(response.status).toBe(200);
+  expect(response.body.success).toBe(true);
+  expect(response.body.message).toBe('Inventory & Order REST API is running');
+  expect(response.body.endpoints).toBeDefined();
 });
 
 afterAll(async () => {
